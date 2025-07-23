@@ -25,6 +25,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         description="Curses-based viewer for a JSON array / JSONL of items.",
     )
     p.add_argument("file", help="Path to a JSON file whose root is a list (or JSONL).")
+    # cli.py
+    p.add_argument("--jsonl", action="store_true", help="Force JSONL mode (one object per line)")
     return p.parse_args(argv)
 
 
