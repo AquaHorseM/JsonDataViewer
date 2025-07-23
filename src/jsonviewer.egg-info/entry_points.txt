@@ -1,0 +1,2 @@
+[console_scripts]
+jsonviewer = jsonviewer.cli:main

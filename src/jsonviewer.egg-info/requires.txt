@@ -1,0 +1,4 @@
+ijson>=3.2
+
+[:python_version < "3.11"]
+typing-extensions
