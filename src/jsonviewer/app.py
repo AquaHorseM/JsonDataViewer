@@ -27,12 +27,15 @@ from .ui.key_view import draw_keys
 
 
 class JSONViewer:
-    def __init__(self, stdscr, filename: str):
+    def __init__(self, stdscr, filename: str, count_total: bool = False, buffer_size: int = 30):
         self.stdscr = stdscr
         self.loader = ItemLoader(filename)
         self.state = ViewerState()
+        self.state.prev_buf = deque(maxlen=buffer_size if buffer_size > 0 else None)
         self._init_curses()
         self._open_first_item()
+        if count_total:
+            self.loader.start_count_total()
 
     # ------------------------------------------------------------------ #
     # Initialization / teardown
@@ -57,6 +60,9 @@ class JSONViewer:
         except StopIteration:
             self.loader.close()
             raise SystemExit("Error: JSON contains no items")
+        self.state.index = 0
+        self.state.prev_buf.clear()
+        self.state.fwd_buf.clear()
         self._prepare_current()
 
     # ------------------------------------------------------------------ #
@@ -152,6 +158,8 @@ class JSONViewer:
     # Rendering
     # ------------------------------------------------------------------ #
     def _draw(self) -> None:
+        if self.state.total_count is None and self.loader.total_items is not None:
+            self.state.total_count = self.loader.total_items
         if self.state.key_mode:
             draw_keys(self.stdscr, self.state)
         else:
@@ -174,12 +182,18 @@ class JSONViewer:
     # ------------------------------------------------------------------ #
     def _next_item(self) -> None:
         st = self.state
+        # If we came from a prev, prefer forward stack
+        if st.fwd_buf:
+            st.prev_buf.append(st.current)
+            st.current = st.fwd_buf.pop()          # last pushed is next
+            st.index += 1
+            self._prepare_current()
+            return
+
+        # normal streaming
         try:
             st.prev_buf.append(st.current)
-            if isinstance(st.prev_buf, deque):
-                # ensure len<=3 if the user switched away
-                while len(st.prev_buf) > 3:
-                    st.prev_buf.popleft()
+            st.fwd_buf.clear()
             st.current = self.loader.next_item()
             st.index += 1
             self._prepare_current()
@@ -189,6 +203,7 @@ class JSONViewer:
     def _prev_item(self) -> None:
         st = self.state
         if st.prev_buf:
+            st.fwd_buf.append(st.current)
             st.current = st.prev_buf.pop()
             st.index -= 1
             self._prepare_current()
@@ -200,26 +215,25 @@ class JSONViewer:
         try:
             tgt = int(s) - 1
         except Exception:
-            curses.flash()
-            return
+            curses.flash(); return
 
         self.loader.open()
-        self.state.prev_buf.clear()
-        self.state.index = 0
+        st = self.state
+        st.prev_buf.clear()
+        st.fwd_buf.clear()
+        st.index = 0
         try:
-            self.state.current = self.loader.next_item()
+            st.current = self.loader.next_item()
         except StopIteration:
-            curses.flash()
-            return
+            curses.flash(); return
 
-        while self.state.index < tgt:
-            self.state.prev_buf.append(self.state.current)
+        while st.index < tgt:
+            st.prev_buf.append(st.current)
             try:
-                self.state.current = self.loader.next_item()
+                st.current = self.loader.next_item()
             except StopIteration:
-                curses.flash()
-                break
-            self.state.index += 1
+                curses.flash(); break
+            st.index += 1
         self._prepare_current()
 
     # ------------------------------------------------------------------ #
@@ -352,6 +366,6 @@ class JSONViewer:
 # ---------------------------------------------------------------------- #
 # Convenience function called by curses.wrapper in cli.py
 # ---------------------------------------------------------------------- #
-def run(stdscr, filename: str) -> None:
-    viewer = JSONViewer(stdscr, filename)
+def run(stdscr, filename: str, count_total: bool = True, buffer_size: int = 3) -> None:
+    viewer = JSONViewer(stdscr, filename, count_total=count_total, buffer_size=buffer_size)
     viewer.loop()

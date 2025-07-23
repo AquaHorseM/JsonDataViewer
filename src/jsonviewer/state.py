@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Tuple, List, Set
+from collections import deque
 
 Path = Tuple[Any, ...]  # sequence of keys / indices
 
@@ -17,7 +18,8 @@ class ViewerState:
     search_q: str | None = None
     matches: List[tuple[int,int,int]] = field(default_factory=list)
     match_idx: int = 0
-    prev_buf: List[Any] = field(default_factory=list)
+    prev_buf: deque[Any] = field(default_factory=lambda: deque(maxlen=3))
+    fwd_buf: list[Any] = field(default_factory=list)
     index: int = 0
     top: int = 0
     key_mode: bool = False
@@ -33,3 +35,5 @@ class ViewerState:
     current: Any = None
     raw_lines: List[str] = field(default_factory=list)
     wrapped: List[str] = field(default_factory=list)
+    
+    total_count: int | None = None

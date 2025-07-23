@@ -35,9 +35,12 @@ def draw_full(stdscr, state):
                     attr |= curses.A_UNDERLINE
                 safe_chgat(stdscr, row, s, e - s, attr)
 
+    total = state.total_count if state.total_count is not None else "?"
     mode = "Fold" if state.fold_mode else "Full"
+    maxlen = getattr(state.prev_buf, "maxlen", None)
+    prev_info = f"{len(state.prev_buf)}/{maxlen if maxlen is not None else '∞'}"
     status = (
-        f"Item {state.index+1} prev {len(state.prev_buf)}/3 [{mode} View] "
+        f"Item {state.index+1}/{total} prev {prev_info} [{mode} View] "
         "[↑/↓ j/k] scroll [→] next [←] prev "
         "[/] search [n/N] nav [g] goto [f] fold [m] keys [q] quit"
     )[:w-1].ljust(w-1)

@@ -84,5 +84,6 @@ def draw_keys(stdscr, state):
                 safe_addnstr(stdscr, row_screen, 0, ln, width)
                 row_screen += 1
 
-    status = "Key Mode  [↑/↓] same depth  [Enter] toggle  [→] child  [←] parent  [m] exit"
+    total = state.total_count if state.total_count is not None else "?"
+    status = f"Key Mode  ({state.index+1}/{total})  [↑/↓] same depth  [Enter] toggle  [→] child  [←] parent  [m] exit"
     draw_status(stdscr, status)

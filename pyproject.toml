@@ -5,7 +5,7 @@ description = "Curses-based streaming JSON list viewer"
 authors = [{ name="Qinwei Ma", email="qinweimartin@gmail.com" }]
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["ijson>=3.2", "typing-extensions"]
+dependencies = ["ijson>=3.2", "typing-extensions", "tomli-w>=1.0.0"]
 
 [project.scripts]
 jsonviewer = "jsonviewer.cli:main"
