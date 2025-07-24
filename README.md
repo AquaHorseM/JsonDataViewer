@@ -32,17 +32,40 @@ pip install -e .
 ## Usage
 
 ```bash
+# Basic (opens viewer; same as `jsonviewer view …`)
 jsonviewer path/to/big_list.json
-# or
-python -m jsonviewer path/to/big_list.json
-# or
-./scripts/run.sh path/to/big_list.json
+
+# Explicit sub‑command (identical)
+jsonviewer view path/to/big_list.json
+
+# Override history buffer (keep last 10 items in memory)
+jsonviewer view --buffer-size 10 path/to/big_list.json
+
+# Disable background total‑item counting
+jsonviewer view --no-count-total path/to/big_list.json
 ```
 
-Input must be:
+---
 
-- A JSON whose **root is a list/array**, or
-- A JSONL file (one JSON object per line).
+## Managing Defaults
+
+```bash
+# Show all current defaults
+jsonviewer config get
+
+# Show a single key
+jsonviewer config get buffer_size
+
+# Set a default (persists in ~/.config/jsonviewer/config.toml)
+jsonviewer config set buffer_size 20
+jsonviewer config set count_total false
+
+# Reset everything to factory defaults
+jsonviewer config reset
+
+# Where the config file lives
+jsonviewer config path
+```
 
 ---
 
