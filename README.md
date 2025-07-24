@@ -11,7 +11,7 @@ A fast, curses-based viewer for **huge JSON arrays / JSONL files**. It streams i
   - **Full view**: pretty-printed JSON with regex/text highlight.  
   - **Key mode**: tree of keys/indices; expand dicts, lists **and long scalars**.
 - **Search & navigate**: `/` to search (regex or plain), `n/N` move between matches (wraps to next/prev item).
-- **Jump & history**: `g` jump to item number; 3-item back buffer.
+- **Jump & history**: `g` jump to item number; limited back buffer to keep it lightweight.
 - **Fold mode**: truncate long lines for quick scanning.
 
 ---
